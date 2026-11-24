@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AZ Zikr — Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Amiri:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#061230; --navy-2:#0b1d4a; --royal:#1f3fd1; --lime:#D4FF24;
+    --text:#eef2ff; --muted:#8e9bc4; --line:rgba(255,255,255,.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:"IBM Plex Sans Arabic",system-ui,sans-serif;
+    background:radial-gradient(1200px 700px at 80% -10%, #16308a 0%, transparent 60%),
+               radial-gradient(900px 600px at 0% 110%, #0d2470 0%, transparent 55%), var(--navy);
+    color:var(--text); overflow:hidden;
+  }
+  .layout{display:grid;grid-template-columns:380px 1fr;height:100vh;gap:24px;padding:24px}
+
+  /* ---------- Demo stage (fake desktop) ---------- */
+  .stage{
+    position:relative;border-radius:22px;overflow:hidden;cursor:default;
+    background:linear-gradient(160deg,#e9edf7 0%,#d9e0f2 100%);
+    box-shadow:0 30px 80px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.4);
+  }
+  .win{
+    position:absolute;border-radius:14px;background:#fff;
+    box-shadow:0 18px 40px rgba(20,30,70,.18);overflow:hidden;
+  }
+  .win .bar{height:34px;background:#f3f5fa;border-bottom:1px solid #e6e9f2;display:flex;gap:7px;align-items:center;padding:0 14px;direction:ltr}
+  .win .bar i{width:11px;height:11px;border-radius:50%;background:#ff5f57}
+  .win .bar i:nth-child(2){background:#febc2e}.win .bar i:nth-child(3){background:#28c840}
+  .win .body{padding:18px;display:grid;gap:10px}
+  .ln{height:10px;border-radius:6px;background:#e9ecf4}
+  .stage-hint{
+    position:absolute;bottom:18px;left:50%;transform:translateX(-50%);
+    background:rgba(6,18,48,.85);color:#fff;font-size:13px;padding:8px 16px;border-radius:999px;
+    backdrop-filter:blur(10px);pointer-events:none;white-space:nowrap
+  }
+
+  /* ---------- The bubble ---------- */
+  .zk{
+    position:fixed;left:0;top:0;pointer-events:none;z-index:50;
+    transform:translate(-50%,-100%);
+  }
+  .zk .pill{
+    position:relative;
+    display:flex;align-items:center;
+    padding:5px 11px 6px;border-radius:999px;
+    font-family:"IBM Plex Sans Arabic",sans-serif;font-weight:600;font-size:var(--fs,13px);
+    color:rgba(255,255,255,.92);white-space:nowrap;font-weight:500;
+    background:rgba(8,22,60,.82);
+    border:1px solid rgba(255,255,255,.08);
+    box-shadow:0 4px 12px rgba(6,18,48,.18);
+    backdrop-filter:blur(14px);
+    transform-origin:50% 120%;
+    animation:pop var(--dur,1600ms) ease-out forwards;
+  }
+  .zk .pill::after{ /* tail */
+    content:"";position:absolute;left:50%;bottom:-4px;width:8px;height:8px;
+    background:rgba(8,22,60,.82);
+    transform:translateX(-50%) rotate(45deg);border-radius:0 0 3px 0;
+  }
+  /* ---- bubble style variants ---- */
+  /* 6) gradient: calm navy → royal blue */
+  .zk.s-grad .pill{background:linear-gradient(135deg,rgba(6,18,48,.9) 0%,rgba(20,52,150,.88) 100%);
+    border:1px solid rgba(255,255,255,.1)}
+  .zk.s-grad .pill::after{background:rgba(12,32,95,.9)}
+  /* 2) glass: light frosted, navy text */
+  .zk.s-glass .pill{background:rgba(255,255,255,.72);color:#061230;border:1px solid rgba(255,255,255,.9);
+    box-shadow:0 4px 14px rgba(6,18,48,.12);backdrop-filter:blur(12px) saturate(1.4)}
+  .zk.s-glass .pill::after{background:rgba(255,255,255,.72)}
+  /* 3) text only: no background, soft halo so it reads on any screen */
+  .zk.s-text .pill{background:none;border:none;box-shadow:none;backdrop-filter:none;padding:2px 4px;color:#0b1d4a;
+    font-weight:600;text-shadow:0 0 6px #fff,0 0 12px #fff,0 0 2px #fff}
+  .zk.s-text .pill::after{display:none}
+  /* 4) calligraphy: Amiri, deep navy, tiny lime stroke under it */
+  .zk.s-callig .pill{background:none;border:none;box-shadow:none;backdrop-filter:none;padding:0 4px 6px;
+    font-family:"Amiri",serif;font-weight:700;font-size:calc(var(--fs,13px) * 1.35);color:#061230;
+    text-shadow:0 0 8px rgba(255,255,255,.95),0 0 2px #fff}
+  .zk.s-callig .pill::after{left:50%;bottom:0;width:60%;height:2px;border-radius:2px;transform:translateX(-50%);
+    background:linear-gradient(90deg,transparent,#a8cc00,transparent)}
+  /* 5) tag: compact rounded rectangle, royal-blue accent edge */
+  .zk.s-tag .pill{border-radius:8px;background:#fff;color:#061230;border:none;
+    border-inline-start:3px solid #004acc;box-shadow:0 3px 10px rgba(6,18,48,.14)}
+  .zk.s-tag .pill::after{background:#fff;width:7px;height:7px;bottom:-3px}
+
+  .styles{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:6px}
+  .styles button{border:1px solid var(--line);background:rgba(255,255,255,.04);border-radius:12px;padding:10px 2px 7px;
+    cursor:pointer;display:grid;gap:7px;justify-items:center;color:var(--muted);font:inherit;font-size:11px;transition:.2s}
+  .styles button.on{border-color:rgba(212,255,36,.6);color:#fff;background:rgba(212,255,36,.08)}
+  .styles .pv{height:22px;display:grid;place-items:center;border-radius:8px;width:84%;
+    background:linear-gradient(160deg,#e9edf7,#d3dbef)}
+  .styles .pv i{font-style:normal;font-size:9px;font-weight:600;line-height:1;padding:3px 6px;border-radius:999px;white-space:nowrap}
+  .pv .p-calm{background:rgba(8,22,60,.85);color:#fff}
+  .pv .p-grad{background:linear-gradient(135deg,#061230,#1434a0);color:#fff}
+  .pv .p-glass{background:rgba(255,255,255,.8);color:#061230}
+  .pv .p-text{color:#0b1d4a;text-shadow:0 0 4px #fff}
+  .pv .p-callig{font-family:"Amiri",serif;font-size:12px;color:#061230;border-bottom:1.5px solid #a8cc00;border-radius:0}
+  .pv .p-tag{background:#fff;color:#061230;border-radius:4px;border-inline-start:2px solid #004acc}
+
+  @keyframes pop{
+    0%  {opacity:0;transform:translateY(4px)}
+    18% {opacity:1;transform:translateY(0)}
+    75% {opacity:1;transform:translateY(-6px)}
+    100%{opacity:0;transform:translateY(-10px)}
+  }
+  .ring{
+    position:fixed;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;
+    border:2px solid var(--lime);pointer-events:none;z-index:49;
+    animation:ring 600ms ease-out forwards;
+  }
+  @keyframes ring{from{opacity:.9;transform:scale(.4)}to{opacity:0;transform:scale(3.2)}}
+  .spark{
+    position:fixed;width:5px;height:5px;border-radius:50%;background:var(--lime);pointer-events:none;z-index:49;
+    animation:spark 700ms ease-out forwards;
+  }
+  @keyframes spark{from{opacity:1;transform:translate(0,0) scale(1)}to{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.2)}}
+
+  /* fake cursor for the auto demo */
+  .cursor{position:fixed;left:0;top:0;width:22px;height:22px;z-index:60;pointer-events:none;
+    transition:transform 700ms cubic-bezier(.5,0,.2,1);display:none}
+  .cursor svg{filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
+  .cursor.down svg{transform:scale(.85)}
+
+  /* ---------- Settings panel ---------- */
+  .panel{
+    background:linear-gradient(180deg,rgba(15,32,85,.75),rgba(6,18,48,.85));
+    border:1px solid var(--line);border-radius:22px;padding:22px;
+    display:flex;flex-direction:column;gap:18px;overflow:auto;
+    box-shadow:0 30px 80px rgba(0,0,0,.35);backdrop-filter:blur(20px);
+  }
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;
+    background:linear-gradient(135deg,var(--royal),var(--navy-2));border:1px solid rgba(212,255,36,.4);
+    font-family:"Amiri",serif;font-size:22px;color:var(--lime)}
+  .brand h1{font-size:19px;font-weight:700;letter-spacing:.2px}
+  .brand h1 b{color:var(--lime);font-weight:700}
+  .brand p{font-size:12px;color:var(--muted)}
+  .switch{margin-inline-start:auto;width:46px;height:26px;border-radius:999px;background:#26335c;position:relative;cursor:pointer;transition:.25s;border:none}
+  .switch::after{content:"";position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.25s}
+  .switch.on{background:var(--lime)}
+  .switch.on::after{right:23px;background:var(--navy)}
+
+  .counter{
+    border-radius:16px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;
+    background:linear-gradient(135deg,rgba(212,255,36,.12),rgba(212,255,36,.02));border:1px solid rgba(212,255,36,.25)
+  }
+  .counter small{color:var(--muted);font-size:12px;display:block}
+  .counter strong{font-size:28px;color:var(--lime);font-weight:700;line-height:1.1}
+  .counter .tag{font-size:12px;color:var(--text);opacity:.8}
+
+  .sec h3{font-size:13px;color:var(--muted);font-weight:500;margin-bottom:10px}
+  .seg{display:grid;grid-template-columns:repeat(3,1fr);background:rgba(255,255,255,.05);border-radius:12px;padding:4px;gap:4px}
+  .seg button{border:none;background:none;color:var(--text);font:inherit;font-size:13px;padding:8px 4px;border-radius:9px;cursor:pointer}
+  .seg button.on{background:var(--lime);color:var(--navy);font-weight:600}
+  .row{display:flex;align-items:center;justify-content:space-between;font-size:13px;margin-top:12px}
+  .row output{color:var(--lime);font-weight:600}
+  input[type=range]{width:100%;margin-top:8px;accent-color:var(--lime)}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);font:inherit;font-size:14px;
+    padding:7px 12px;border-radius:999px;cursor:pointer;transition:.2s}
+  .chip.on{border-color:rgba(212,255,36,.6);background:rgba(212,255,36,.1);color:#fff}
+  .chip.on::before{content:"✓ ";color:var(--lime)}
+  .add{display:flex;gap:8px;margin-top:10px}
+  .add input{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:10px;color:#fff;font:inherit;font-size:13px;padding:8px 12px;outline:none}
+  .add input:focus{border-color:rgba(212,255,36,.5)}
+  .add button,.btn{background:var(--lime);color:var(--navy);border:none;border-radius:10px;font:inherit;font-weight:600;font-size:13px;padding:8px 14px;cursor:pointer}
+  .btn.ghost{background:rgba(255,255,255,.06);color:var(--text);border:1px solid var(--line)}
+  .foot{margin-top:auto;display:flex;gap:8px}
+
+  @media (max-width:820px){
+    body{overflow:auto}
+    .layout{grid-template-columns:1fr;height:auto;padding:14px;gap:14px}
+    .stage{height:46vh;min-height:300px;order:-1}
+    .panel{overflow:visible}
+  }
+
+  /* ---------- Credit footer ---------- */
+  .credit{background:#fff;color:#061230;border-radius:16px;padding:12px 14px;display:grid;gap:10px;
+    box-shadow:0 8px 24px rgba(0,0,0,.25)}
+  .credit .top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .credit .who{display:flex;align-items:center;gap:9px;direction:ltr}
+  .credit .who svg{height:22px;width:auto;display:block}
+  .credit .who span{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:13px;font-weight:600;letter-spacing:.1px}
+  .credit .links{display:flex;gap:6px;direction:ltr}
+  .ic{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:#f1f4fb;color:#061230;
+    text-decoration:none;transition:.2s}
+  .ic:hover{background:#004acc;color:#fff;transform:translateY(-1px)}
+  .ic svg{width:15px;height:15px;display:block}
+  .credit .idea{border-bottom:1px solid #eef1f7;padding-bottom:9px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#5b6688}
+  .credit .idea b{color:#061230;font-weight:600}
+  .credit .idea a.name{color:#061230;text-decoration:none;font-weight:600;direction:ltr;display:inline-block}
+  .credit .idea a.name:hover{color:#004acc}
+  .foot .btn{flex:1;padding:11px}
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- Settings -->
+  <aside class="panel">
+    <div class="brand">
+      <div class="logo">ذ</div>
+      <div><h1>AZ <b>Zikr</b></h1><p>ذكر صغير مع كل كليك</p></div>
+      <button class="switch on" id="power" title="تشغيل / إيقاف"></button>
+    </div>
+
+    <div class="counter">
+      <div><small>ذكرت الله النهارده</small><strong id="count">0</strong></div>
+      <span class="tag">ما شاء الله 🤍</span>
+    </div>
+
+    <div class="sec">
+      <h3>يظهر إمتى؟</h3>
+      <div class="seg" id="mode">
+        <button data-m="click" class="on">كل كليك</button>
+        <button data-m="sec">كل كام ثانية</button>
+        <button data-m="nth">كل كام كليك</button>
+      </div>
+      <div id="modeExtra"></div>
+    </div>
+
+    <div class="sec">
+      <h3>شكل البابل</h3>
+      <div class="styles" id="styles">
+        <button data-s="calm"><span class="pv"><i class="p-calm">ذكر</i></span>كحلي</button>
+        <button data-s="grad"><span class="pv"><i class="p-grad">ذكر</i></span>جريدينت</button>
+        <button data-s="glass"><span class="pv"><i class="p-glass">ذكر</i></span>زجاج</button>
+        <button data-s="tag"><span class="pv"><i class="p-tag">ذكر</i></span>تاج</button>
+        <button data-s="text" class="on"><span class="pv"><i class="p-text">ذكر</i></span>نص بس</button>
+        <button data-s="callig"><span class="pv"><i class="p-callig">ذكر</i></span>خط عربي</button>
+      </div>
+      <div class="row"><span>مدة الظهور</span><output id="durO">1.6 ث</output></div>
+      <input type="range" id="dur" min="800" max="3500" step="100" value="1600">
+      <div class="row"><span>الحجم</span><output id="sizeO">متوسط</output></div>
+      <input type="range" id="size" min="10" max="18" step="1" value="13">
+    </div>
+
+    <div class="sec">
+      <h3>الأذكار</h3>
+      <div class="chips" id="chips"></div>
+      <div class="add"><input id="newZ" placeholder="اكتب ذكر من عندك…"><button id="addZ">إضافة</button></div>
+      <div class="seg" id="order" style="grid-template-columns:1fr 1fr;margin-top:12px">
+        <button data-o="seq" class="on">بالترتيب</button>
+        <button data-o="rand">عشوائي</button>
+      </div>
+    </div>
+
+    <div class="foot">
+      <button class="btn" id="demo">▶ شغّل الديمو</button>
+      <button class="btn ghost" id="reset">تصفير العدّاد</button>
+    </div>
+      <footer class="credit">
+      <div class="idea">
+        <span>💡 الفكرة من <a class="name" href="https://www.facebook.com/sheriftolba28" target="_blank" rel="noopener">Sherif Tolba</a></span>
+        <a class="ic" href="https://www.facebook.com/sheriftolba28" target="_blank" rel="noopener" title="Facebook" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 8h3V4h-3c-2.8 0-4.5 1.8-4.5 4.6V11H7v4h2.5v9h4v-9h3l.5-4h-3.5V8.8c0-.5.3-.8.5-.8z"/></svg></a>
+      </div>
+      <div class="top">
+        <div class="who"><svg aria-label="AZ" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 603.62 422.01">
+  <defs>
+    <style>
+      .azl-1 {
+        fill: #01112d;
+      }
+
+      .azl-2 {
+        fill: #004acc;
+      }
+    </style>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer 1">
+    <g>
+      <path class="azl-1" d="M78.62,0L.01,84.79v191.38l102.58-66.68v-107.68h87.02v113.64l102.25-32.74V0H78.62ZM189.61,276.28v145.71h102.25v-173.11l-102.25,27.4Z"/>
+      <path class="azl-1" d="M337.41,422.01v-88.85l147.44-231.31h-137.33V.04h256.09v84.78l-145.76,235.75h145.76v101.44h-266.21Z"/>
+      <polygon class="azl-2" points="408 145.52 291.88 215.06 276.45 224.28 102.62 328.37 0 389.78 0 276.17 102.62 243.3 189.61 215.45 291.88 182.73 408 145.52"/>
+      <polygon class="azl-1" points="102.62 328.37 102.62 421.97 0 421.97 0 389.78 102.62 328.37"/>
+    </g>
+  </g>
+</svg><span>Abdelrahman Ahmed</span></div>
+        <div class="links">
+          <a class="ic" href="https://www.behance.net/Abdostudio" target="_blank" rel="noopener" title="Behance" aria-label="Behance">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.2 11.4c.9-.4 1.4-1.1 1.4-2.1C9.6 7.4 8.2 6.5 6.3 6.5H1.5v11h5c2 0 3.8-1 3.8-3.1 0-1.3-.7-2.6-2.1-3zM3.9 8.4h2c.8 0 1.4.3 1.4 1.1 0 .8-.6 1.1-1.3 1.1H3.9V8.4zm2.2 7.2H3.9v-2.9h2.3c.9 0 1.6.4 1.6 1.5 0 1-.8 1.4-1.7 1.4zM15.4 7.3h4.8v1.2h-4.8zM17.9 9.4c-2.5 0-4.2 1.8-4.2 4.2 0 2.5 1.6 4.2 4.2 4.2 1.9 0 3.2-.9 3.8-2.7h-2c-.2.6-1 .9-1.7.9-1.3 0-2-.7-2-2h5.8c.2-2.6-1.3-4.6-3.9-4.6zm-1.9 3.3c.1-1 .8-1.6 1.8-1.6s1.6.6 1.7 1.6H16z"/></svg>
+          </a>
+          <a class="ic" href="https://www.linkedin.com/in/abdostudio/" target="_blank" rel="noopener" title="LinkedIn" aria-label="LinkedIn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9.5h4V21H3zM9.5 9.5h3.8v1.6h.1c.5-1 1.8-2 3.8-2 4 0 4.8 2.6 4.8 6V21h-4v-5.3c0-1.3 0-2.9-1.8-2.9s-2 1.4-2 2.8V21h-4z"/></svg>
+          </a>
+          <a class="ic" href="mailto:abdstudio.me@gmail.com" title="Email" aria-label="Email">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+          </a>
+        </div>
+      </div>
+    </footer>
+</aside>
+
+  <!-- Fake desktop -->
+  <main class="stage" id="stage">
+    <div class="win" style="right:6%;top:8%;width:46%;height:46%">
+      <div class="bar"><i></i><i></i><i></i></div>
+      <div class="body"><div class="ln" style="width:70%"></div><div class="ln"></div><div class="ln" style="width:85%"></div><div class="ln" style="width:60%"></div></div>
+    </div>
+    <div class="win" style="left:7%;top:30%;width:40%;height:52%">
+      <div class="bar"><i></i><i></i><i></i></div>
+      <div class="body"><div class="ln" style="width:50%"></div><div class="ln"></div><div class="ln"></div><div class="ln" style="width:75%"></div><div class="ln" style="width:40%"></div></div>
+    </div>
+    <div class="stage-hint">اضغط في أي حتة هنا 👆 أو شغّل الديمو</div>
+  </main>
+</div>
+
+<div class="cursor" id="cur"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M4 2l16 9.5-7 1.6-3.6 6.9z" fill="#111" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+
+<script>
+const S = {
+  on:true, mode:'click', sec:5, nth:3, dur:1600, size:13, style:'text', order:'seq',
+  azkar:[
+    {t:'أستغفر الله',on:true},{t:'سبحان الله',on:true},{t:'الحمد لله',on:true},
+    {t:'لا إله إلا الله',on:true},{t:'الله أكبر',on:false},
+    {t:'اللهم صلِّ على محمد',on:false},{t:'سبحان الله وبحمده',on:false},
+    {t:'لا حول ولا قوة إلا بالله',on:false}
+  ],
+  idx:0, clicks:0, last:0, count:0
+};
+const $ = s=>document.querySelector(s);
+
+function renderChips(){
+  const c=$('#chips'); c.innerHTML='';
+  S.azkar.forEach((z,i)=>{
+    const b=document.createElement('button'); b.className='chip'+(z.on?' on':''); b.textContent=z.t;
+    b.onclick=()=>{ z.on=!z.on; if(!S.azkar.some(x=>x.on)) z.on=true; renderChips(); };
+    c.appendChild(b);
+  });
+}
+function renderModeExtra(){
+  const e=$('#modeExtra');
+  if(S.mode==='sec') e.innerHTML=`<div class="row"><span>مرة كل</span><output id="mO">${S.sec} ث</output></div><input type="range" id="mR" min="1" max="60" value="${S.sec}">`;
+  else if(S.mode==='nth') e.innerHTML=`<div class="row"><span>مرة كل</span><output id="mO">${S.nth} كليك</output></div><input type="range" id="mR" min="2" max="20" value="${S.nth}">`;
+  else { e.innerHTML=''; return; }
+  $('#mR').oninput=ev=>{ const v=+ev.target.value;
+    if(S.mode==='sec'){S.sec=v;$('#mO').textContent=v+' ث'} else {S.nth=v;$('#mO').textContent=v+' كليك'} };
+}
+function nextZikr(){
+  const list=S.azkar.filter(z=>z.on).map(z=>z.t);
+  if(S.order==='rand') return list[Math.floor(Math.random()*list.length)];
+  return list[(S.idx++)%list.length];
+}
+function shouldShow(){
+  if(!S.on) return false;
+  S.clicks++;
+  if(S.mode==='nth') return S.clicks % S.nth === 0;
+  if(S.mode==='sec'){ const now=Date.now(); if(now-S.last < S.sec*1000) return false; S.last=now; return true; }
+  return true;
+}
+function burst(x,y){
+  const r=document.createElement('div'); r.className='ring'; r.style.left=x+'px'; r.style.top=y+'px';
+  document.body.appendChild(r); setTimeout(()=>r.remove(),650);
+  for(let i=0;i<6;i++){
+    const s=document.createElement('div'); s.className='spark';
+    const a=(Math.PI*2*i/6)+Math.random()*.5, d=18+Math.random()*14;
+    s.style.left=x+'px'; s.style.top=y+'px';
+    s.style.setProperty('--dx',Math.cos(a)*d+'px'); s.style.setProperty('--dy',Math.sin(a)*d+'px');
+    document.body.appendChild(s); setTimeout(()=>s.remove(),720);
+  }
+}
+function bubble(x,y){
+  if(!shouldShow()) return;
+  const w=document.createElement('div'); w.className='zk s-'+S.style;
+  w.style.left=x+'px'; w.style.top=(y-10)+'px';
+  w.style.setProperty('--dur',S.dur+'ms'); w.style.setProperty('--fs',S.size+'px');
+  w.innerHTML=`<div class="pill">${nextZikr()}</div>`;
+  document.body.appendChild(w);
+  setTimeout(()=>w.remove(),S.dur+50);
+  S.count++; $('#count').textContent=S.count.toLocaleString('ar-EG');
+}
+
+$('#stage').addEventListener('mousedown',e=>bubble(e.clientX,e.clientY));
+$('#power').onclick=e=>{S.on=!S.on;e.currentTarget.classList.toggle('on',S.on)};
+document.querySelectorAll('#mode button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#mode button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+  S.mode=b.dataset.m; S.clicks=0; S.last=0; renderModeExtra();
+});
+document.querySelectorAll('#order button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#order button').forEach(x=>x.classList.remove('on'));b.classList.add('on');S.order=b.dataset.o;
+});
+$('#dur').oninput=e=>{S.dur=+e.target.value;$('#durO').textContent=(S.dur/1000).toFixed(1)+' ث'};
+$('#size').oninput=e=>{S.size=+e.target.value;$('#sizeO').textContent=S.size<12?'صغير':S.size<15?'متوسط':'كبير'};
+$('#addZ').onclick=()=>{const v=$('#newZ').value.trim(); if(!v) return; S.azkar.push({t:v,on:true}); $('#newZ').value=''; renderChips();};
+$('#newZ').onkeydown=e=>{if(e.key==='Enter')$('#addZ').click()};
+$('#reset').onclick=()=>{S.count=0;$('#count').textContent='٠'};
+
+/* auto demo: fake cursor moves & clicks around the stage */
+let demoTimer=null;
+const cur=$('#cur');
+$('#demo').onclick=()=>{
+  if(demoTimer){clearInterval(demoTimer);demoTimer=null;cur.style.display='none';$('#demo').textContent='▶ شغّل الديمو';return;}
+  $('#demo').textContent='■ وقّف الديمو'; cur.style.display='block';
+  const step=()=>{
+    const r=$('#stage').getBoundingClientRect();
+    const x=r.left+r.width*(.15+Math.random()*.7), y=r.top+r.height*(.2+Math.random()*.6);
+    cur.style.transform=`translate(${x-4}px,${y-2}px)`;
+    setTimeout(()=>{cur.classList.add('down');bubble(x,y);setTimeout(()=>cur.classList.remove('down'),120)},750);
+  };
+  step(); demoTimer=setInterval(step,1300);
+};
+
+document.querySelectorAll('#styles button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#styles button').forEach(x=>x.classList.remove('on'));b.classList.add('on');S.style=b.dataset.s;
+  const r=document.querySelector('#stage').getBoundingClientRect(); const c=S.clicks; bubble(r.left+r.width/2, r.top+r.height/2);
+});
+renderChips(); renderModeExtra();
+</script>
+</body>
+</html>

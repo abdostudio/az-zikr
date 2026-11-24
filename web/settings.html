@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AZ Zikr</title>
+<link rel="stylesheet" href="bubble.css">
+<style>
+  :root{--navy:#061230;--navy-2:#0b1d4a;--royal:#1f3fd1;--lime:#D4FF24;--text:#eef2ff;--muted:#8e9bc4;--line:rgba(255,255,255,.08)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{background:var(--navy)}
+  body{
+    font-family:"IBM Plex Sans Arabic",-apple-system,"SF Arabic","Segoe UI",Tahoma,sans-serif;
+    color:var(--text);min-height:100vh;padding:14px 16px 16px;
+    background:radial-gradient(700px 420px at 100% -10%,#16308a 0%,transparent 60%),
+               radial-gradient(600px 400px at 0% 110%,#0d2470 0%,transparent 55%),var(--navy);
+    user-select:none;-webkit-user-select:none;cursor:default
+  }
+  .panel{display:flex;flex-direction:column;gap:18px}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;
+    background:linear-gradient(135deg,var(--royal),var(--navy-2));border:1px solid rgba(212,255,36,.4);
+    flex:none}
+  .logo svg{width:26px;height:auto;display:block}
+  .brand h1{font-size:19px;font-weight:700}
+  .brand h1 b{color:var(--lime)}
+  .brand p{font-size:12px;color:var(--muted)}
+  .switch{margin-inline-start:auto;width:46px;height:26px;border-radius:999px;background:#26335c;position:relative;cursor:pointer;transition:.25s;border:none;flex:none}
+  .switch::after{content:"";position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.25s}
+  .switch.on{background:var(--lime)}
+  .switch.on::after{right:23px;background:var(--navy)}
+  .switch.sm{width:38px;height:22px;margin:0}
+  .switch.sm::after{width:16px;height:16px}
+  .switch.sm.on::after{right:19px}
+
+  .counter{border-radius:16px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;
+    background:linear-gradient(135deg,rgba(212,255,36,.12),rgba(212,255,36,.02));border:1px solid rgba(212,255,36,.25)}
+  .counter small{color:var(--muted);font-size:12px;display:block}
+  .counter strong{font-size:28px;color:var(--lime);font-weight:700;line-height:1.1}
+  .counter .tag{font-size:12px;opacity:.8}
+
+  .sec h3{font-size:13px;color:var(--muted);font-weight:500;margin-bottom:10px}
+  .seg{display:grid;grid-template-columns:repeat(3,1fr);background:rgba(255,255,255,.05);border-radius:12px;padding:4px;gap:4px}
+  .seg button{border:none;background:none;color:var(--text);font:inherit;font-size:13px;padding:8px 4px;border-radius:9px;cursor:pointer}
+  .seg button.on{background:var(--lime);color:var(--navy);font-weight:600}
+  .row{display:flex;align-items:center;justify-content:space-between;font-size:13px;margin-top:12px}
+  .row output{color:var(--lime);font-weight:600}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;margin-top:10px;height:4px;border-radius:4px;
+    background:linear-gradient(to left,var(--lime) var(--p,50%),rgba(255,255,255,.12) var(--p,50%));outline:none;cursor:pointer}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#fff;
+    border:3px solid var(--lime);box-shadow:0 2px 6px rgba(0,0,0,.35)}
+
+  .styles{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:6px}
+  .styles button{border:1px solid var(--line);background:rgba(255,255,255,.04);border-radius:12px;padding:10px 2px 7px;
+    cursor:pointer;display:grid;gap:7px;justify-items:center;color:var(--muted);font:inherit;font-size:11px;transition:.2s}
+  .styles button.on{border-color:rgba(212,255,36,.6);color:#fff;background:rgba(212,255,36,.08)}
+  .styles .pv{height:22px;display:grid;place-items:center;border-radius:8px;width:84%;background:linear-gradient(160deg,#e9edf7,#d3dbef)}
+  .styles .pv i{font-style:normal;font-size:9px;font-weight:600;line-height:1;padding:3px 6px;border-radius:999px;white-space:nowrap}
+  .pv .p-calm{background:rgba(8,22,60,.85);color:#fff}
+  .pv .p-grad{background:linear-gradient(135deg,#061230,#1434a0);color:#fff}
+  .pv .p-glass{background:rgba(255,255,255,.8);color:#061230}
+  .pv .p-text{color:#0b1d4a;text-shadow:0 0 4px #fff}
+  .pv .p-callig{font-family:"AZ Amiri",serif;font-size:12px;color:#061230;border-bottom:1.5px solid #a8cc00;border-radius:0}
+  .pv .p-tag{background:#fff;color:#061230;border-radius:4px;border-inline-start:2px solid #004acc}
+
+  .screen{position:relative;height:118px;margin-top:10px;border-radius:12px;overflow:hidden;
+    background:linear-gradient(160deg,#e9edf7,#d3dbef);border:1px solid var(--line)}
+  .screen::before{content:"";position:absolute;top:0;left:0;right:0;height:9px;background:rgba(255,255,255,.6)}
+  .screen::after{content:"";position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:42%;height:9px;border-radius:5px;background:rgba(255,255,255,.55)}
+  .spot{position:absolute;width:58px;height:20px;border-radius:999px;border:1.5px dashed rgba(6,18,48,.28);background:transparent;
+    cursor:pointer;font:inherit;font-size:10px;font-weight:600;color:transparent;transition:.2s;z-index:1}
+  .spot:hover{border-color:rgba(6,18,48,.55)}
+  .spot.on{background:#061230;border-color:#061230;color:#fff}
+  .spot[data-c="tl"]{top:16px;left:12px} .spot[data-c="tc"]{top:16px;left:50%;transform:translateX(-50%)} .spot[data-c="tr"]{top:16px;right:12px}
+  .spot[data-c="bl"]{bottom:20px;left:12px} .spot[data-c="bc"]{bottom:20px;left:50%;transform:translateX(-50%)} .spot[data-c="br"]{bottom:20px;right:12px}
+  .hint{font-size:11px;color:var(--muted);margin-top:8px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);font:inherit;font-size:14px;
+    padding:7px 12px;border-radius:999px;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:6px}
+  .chip.on{border-color:rgba(212,255,36,.6);background:rgba(212,255,36,.1);color:#fff}
+  .chip.on::before{content:"✓";color:var(--lime)}
+  .chip .x{opacity:.45;font-size:12px;padding-inline-start:2px}
+  .chip .x:hover{opacity:1;color:#ff8a8a}
+  .add{display:flex;gap:8px;margin-top:10px}
+  .add input{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:10px;color:#fff;font:inherit;font-size:13px;padding:8px 12px;outline:none;user-select:text;-webkit-user-select:text}
+  .add input:focus{border-color:rgba(212,255,36,.5)}
+  .btn{background:var(--lime);color:var(--navy);border:none;border-radius:10px;font:inherit;font-weight:600;font-size:13px;padding:8px 14px;cursor:pointer}
+  .btn.ghost{background:rgba(255,255,255,.06);color:var(--text);border:1px solid var(--line)}
+  .opt{display:flex;align-items:center;justify-content:space-between;font-size:13px;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
+  .foot{display:flex;gap:8px}
+  .foot .btn{flex:1;padding:11px}
+
+  .credit{background:#fff;color:#061230;border-radius:16px;padding:12px 14px;display:grid;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+  .credit .top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .credit .who{display:flex;align-items:center;gap:9px;direction:ltr}
+  .credit .who svg{height:22px;width:auto;display:block}
+  .credit .who span{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;font-size:13px;font-weight:600}
+  .credit .links{display:flex;gap:6px;direction:ltr}
+  .ic{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:#f1f4fb;color:#061230;text-decoration:none;transition:.2s;cursor:pointer}
+  .ic:hover{background:#004acc;color:#fff;transform:translateY(-1px)}
+  .ic svg{width:15px;height:15px;display:block}
+  .credit .idea{border-bottom:1px solid #eef1f7;padding-bottom:9px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#5b6688}
+  .credit .idea a.name{color:#061230;text-decoration:none;font-weight:600;direction:ltr;display:inline-block;cursor:pointer}
+  .credit .idea a.name:hover{color:#004acc}
+</style>
+</head>
+<body>
+<div class="panel">
+  <div class="brand">
+    <div class="logo"><svg aria-label="AZ" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 603.62 422.01"> <defs> <style> .azm-1 { fill: #ffffff; } .azm-2 { fill: #D4FF24; } </style> </defs> <g id="Layer_1-2" data-name="Layer 1"> <g> <path class="azm-1" d="M78.62,0L.01,84.79v191.38l102.58-66.68v-107.68h87.02v113.64l102.25-32.74V0H78.62ZM189.61,276.28v145.71h102.25v-173.11l-102.25,27.4Z"/> <path class="azm-1" d="M337.41,422.01v-88.85l147.44-231.31h-137.33V.04h256.09v84.78l-145.76,235.75h145.76v101.44h-266.21Z"/> <polygon class="azm-2" points="408 145.52 291.88 215.06 276.45 224.28 102.62 328.37 0 389.78 0 276.17 102.62 243.3 189.61 215.45 291.88 182.73 408 145.52"/> <polygon class="azm-1" points="102.62 328.37 102.62 421.97 0 421.97 0 389.78 102.62 328.37"/> </g> </g> </svg></div>
+    <div><h1>AZ <b>Zikr</b></h1><p>ذكر صغير مع كل كليك</p></div>
+    <button class="switch on" id="power" title="تشغيل / إيقاف"></button>
+  </div>
+
+  <div class="counter">
+    <div><small>ذكرت الله النهارده</small><strong id="count">٠</strong></div>
+    <span class="tag">ما شاء الله 🤍</span>
+  </div>
+
+  <div class="sec">
+    <h3>يظهر إمتى؟</h3>
+    <div class="seg" id="mode">
+      <button data-m="click">كل كليك</button>
+      <button data-m="sec">كل كام ثانية</button>
+      <button data-m="nth">كل كام كليك</button>
+    </div>
+    <div id="modeExtra"></div>
+  </div>
+
+  <div class="sec">
+    <h3>شكل البابل</h3>
+    <div class="styles" id="styles">
+      <button data-s="text"><span class="pv"><i class="p-text">ذكر</i></span>نص بس</button>
+      <button data-s="grad"><span class="pv"><i class="p-grad">ذكر</i></span>جريدينت</button>
+      <button data-s="calm"><span class="pv"><i class="p-calm">ذكر</i></span>كحلي</button>
+      <button data-s="glass"><span class="pv"><i class="p-glass">ذكر</i></span>زجاج</button>
+      <button data-s="tag"><span class="pv"><i class="p-tag">ذكر</i></span>تاج</button>
+      <button data-s="callig"><span class="pv"><i class="p-callig">ذكر</i></span>خط عربي</button>
+    </div>
+    <div class="row"><span>مدة الظهور</span><output id="durO"></output></div>
+    <input type="range" id="dur" min="800" max="3500" step="100">
+    <div class="row"><span>الحجم</span><output id="sizeO"></output></div>
+    <input type="range" id="size" min="10" max="18" step="1">
+  </div>
+
+  <div class="sec">
+    <h3>مكان الظهور</h3>
+    <div class="seg" id="pos" style="grid-template-columns:1fr 1fr">
+      <button data-p="cursor">جنب الماوس</button>
+      <button data-p="fixed">مكان ثابت</button>
+    </div>
+    <div id="cornerBox">
+      <div class="screen" id="corners">
+        <button class="spot" data-c="tl">ذكر</button><button class="spot" data-c="tc">ذكر</button><button class="spot" data-c="tr">ذكر</button>
+        <button class="spot" data-c="bl">ذكر</button><button class="spot" data-c="bc">ذكر</button><button class="spot" data-c="br">ذكر</button>
+      </div>
+      <p class="hint">اختار المكان اللي يظهر فيه الذكر على الشاشة، بعيد عن شغلك.</p>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h3>الأذكار</h3>
+    <div class="chips" id="chips"></div>
+    <div class="add"><input id="newZ" placeholder="اكتب ذكر من عندك…"><button class="btn" id="addZ">إضافة</button></div>
+    <div class="seg" id="order" style="grid-template-columns:1fr 1fr;margin-top:12px">
+      <button data-o="seq">بالترتيب</button>
+      <button data-o="rand">عشوائي</button>
+    </div>
+  </div>
+
+  <div class="opt"><span>يشتغل لوحده مع فتح الجهاز</span><button class="switch sm" id="login"></button></div>
+
+  <div class="foot">
+    <button class="btn" id="test">جرّب البابل</button>
+    <button class="btn ghost" id="reset">تصفير العدّاد</button>
+  </div>
+
+  <footer class="credit">
+    <div class="idea">
+      <span>💡 الفكرة من <a class="name" data-href="https://www.facebook.com/sheriftolba28">Sherif Tolba</a></span>
+      <a class="ic" data-href="https://www.facebook.com/sheriftolba28" title="Facebook" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 8h3V4h-3c-2.8 0-4.5 1.8-4.5 4.6V11H7v4h2.5v9h4v-9h3l.5-4h-3.5V8.8c0-.5.3-.8.5-.8z"/></svg></a>
+    </div>
+    <div class="top">
+      <div class="who"><svg aria-label="AZ" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 603.62 422.01"> <defs> <style> .azl-1 { fill: #01112d; } .azl-2 { fill: #004acc; } </style> </defs> <g id="Layer_1-2" data-name="Layer 1"> <g> <path class="azl-1" d="M78.62,0L.01,84.79v191.38l102.58-66.68v-107.68h87.02v113.64l102.25-32.74V0H78.62ZM189.61,276.28v145.71h102.25v-173.11l-102.25,27.4Z"/> <path class="azl-1" d="M337.41,422.01v-88.85l147.44-231.31h-137.33V.04h256.09v84.78l-145.76,235.75h145.76v101.44h-266.21Z"/> <polygon class="azl-2" points="408 145.52 291.88 215.06 276.45 224.28 102.62 328.37 0 389.78 0 276.17 102.62 243.3 189.61 215.45 291.88 182.73 408 145.52"/> <polygon class="azl-1" points="102.62 328.37 102.62 421.97 0 421.97 0 389.78 102.62 328.37"/> </g> </g> </svg><span>Abdelrahman Ahmed</span></div>
+      <div class="links">
+        <a class="ic" data-href="https://www.behance.net/Abdostudio" title="Behance" aria-label="Behance"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.2 11.4c.9-.4 1.4-1.1 1.4-2.1C9.6 7.4 8.2 6.5 6.3 6.5H1.5v11h5c2 0 3.8-1 3.8-3.1 0-1.3-.7-2.6-2.1-3zM3.9 8.4h2c.8 0 1.4.3 1.4 1.1 0 .8-.6 1.1-1.3 1.1H3.9V8.4zm2.2 7.2H3.9v-2.9h2.3c.9 0 1.6.4 1.6 1.5 0 1-.8 1.4-1.7 1.4zM15.4 7.3h4.8v1.2h-4.8zM17.9 9.4c-2.5 0-4.2 1.8-4.2 4.2 0 2.5 1.6 4.2 4.2 4.2 1.9 0 3.2-.9 3.8-2.7h-2c-.2.6-1 .9-1.7.9-1.3 0-2-.7-2-2h5.8c.2-2.6-1.3-4.6-3.9-4.6zm-1.9 3.3c.1-1 .8-1.6 1.8-1.6s1.6.6 1.7 1.6H16z"/></svg></a>
+        <a class="ic" data-href="https://www.linkedin.com/in/abdostudio/" title="LinkedIn" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9.5h4V21H3zM9.5 9.5h3.8v1.6h.1c.5-1 1.8-2 3.8-2 4 0 4.8 2.6 4.8 6V21h-4v-5.3c0-1.3 0-2.9-1.8-2.9s-2 1.4-2 2.8V21h-4z"/></svg></a>
+        <a class="ic" data-href="mailto:abdstudio.me@gmail.com" title="Email" aria-label="Email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></a>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+/* Bridge to the native shell: WKWebView on Mac, WebView2 on Windows, console in a plain browser. */
+const bridge = {
+  send(m){
+    if (window.webkit && webkit.messageHandlers && webkit.messageHandlers.az) webkit.messageHandlers.az.postMessage(m);
+    else if (window.chrome && chrome.webview) chrome.webview.postMessage(m);
+    else { console.log('[bridge]', m); if (m.type === 'ready') setTimeout(() => AZ.load(DEFAULTS, 0, false)); }
+  }
+};
+const DEFAULTS = {
+  enabled:true, mode:'click', sec:5, nth:3, dur:1600, size:13, style:'text', order:'seq', pos:'cursor', corner:'tr',
+  azkar:[
+    {t:'أستغفر الله',on:true},{t:'سبحان الله',on:true},{t:'الحمد لله',on:true},{t:'لا إله إلا الله',on:true},
+    {t:'الله أكبر',on:false},{t:'اللهم صلِّ على محمد',on:false},{t:'سبحان الله وبحمده',on:false},{t:'لا حول ولا قوة إلا بالله',on:false}
+  ]
+};
+let S = null;
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const ar = n => Number(n).toLocaleString('ar-EG');
+const save = () => bridge.send({type:'save', settings:S});
+
+function setOn(group, attr, val){ $$(group + ' button').forEach(b => b.classList.toggle('on', b.dataset[attr] === val)); }
+
+function renderChips(){
+  const c = $('#chips'); c.innerHTML = '';
+  S.azkar.forEach((z, i) => {
+    const b = document.createElement('button'); b.className = 'chip' + (z.on ? ' on' : '');
+    b.append(z.t);
+    if (i >= DEFAULTS.azkar.length || !DEFAULTS.azkar.some(d => d.t === z.t)) {
+      const x = document.createElement('span'); x.className = 'x'; x.textContent = '✕'; x.title = 'حذف';
+      x.onclick = e => { e.stopPropagation(); S.azkar.splice(i, 1); ensureOne(); renderChips(); save(); };
+      b.append(x);
+    }
+    b.onclick = () => { z.on = !z.on; ensureOne(); renderChips(); save(); };
+    c.appendChild(b);
+  });
+}
+function ensureOne(){ if (!S.azkar.length) S.azkar = JSON.parse(JSON.stringify(DEFAULTS.azkar)); if (!S.azkar.some(z => z.on)) S.azkar[0].on = true; }
+
+function renderModeExtra(){
+  const e = $('#modeExtra');
+  if (S.mode === 'sec') e.innerHTML = `<div class="row"><span>مرة كل</span><output id="mO">${ar(S.sec)} ث</output></div><input type="range" id="mR" min="1" max="60" value="${S.sec}">`;
+  else if (S.mode === 'nth') e.innerHTML = `<div class="row"><span>مرة كل</span><output id="mO">${ar(S.nth)} كليك</output></div><input type="range" id="mR" min="2" max="20" value="${S.nth}">`;
+  else { e.innerHTML = ''; return; }
+  const r = $('#mR');
+  r.oninput = () => { const v = +r.value;
+    if (S.mode === 'sec') { S.sec = v; $('#mO').textContent = ar(v) + ' ث'; } else { S.nth = v; $('#mO').textContent = ar(v) + ' كليك'; } };
+  r.onchange = save; fill(r);
+}
+function fill(r){ const p=(r.value-r.min)/(r.max-r.min)*100; r.style.setProperty('--p', p+'%'); }
+document.addEventListener('input', e => { if (e.target.type === 'range') fill(e.target); });
+function renderLabels(){
+  fill($('#dur')); fill($('#size'));
+  $('#durO').textContent = ar((S.dur / 1000).toFixed(1)) + ' ث';
+  $('#sizeO').textContent = S.size < 12 ? 'صغير' : S.size < 15 ? 'متوسط' : 'كبير';
+}
+function renderPos(){
+  setOn('#pos', 'p', S.pos);
+  $('#cornerBox').style.display = S.pos === 'fixed' ? '' : 'none';
+  $$('#corners .spot').forEach(b => b.classList.toggle('on', b.dataset.c === S.corner));
+}
+function render(){
+  $('#power').classList.toggle('on', S.enabled);
+  setOn('#mode', 'm', S.mode); setOn('#order', 'o', S.order); setOn('#styles', 's', S.style);
+  renderPos();
+  $('#dur').value = S.dur; $('#size').value = S.size;
+  renderLabels(); renderModeExtra(); renderChips();
+}
+
+/* Called by the native shell */
+window.AZ = {
+  load(settings, count, login){ S = Object.assign(JSON.parse(JSON.stringify(DEFAULTS)), settings || {}); ensureOne(); render(); AZ.setCount(count); AZ.setLogin(login); },
+  setCount(n){ $('#count').textContent = ar(n || 0); },
+  setLogin(on){ $('#login').classList.toggle('on', !!on); },
+  setEnabled(on){ if (S) { S.enabled = !!on; $('#power').classList.toggle('on', S.enabled); } }
+};
+
+$('#power').onclick = () => { S.enabled = !S.enabled; $('#power').classList.toggle('on', S.enabled); save(); };
+$$('#mode button').forEach(b => b.onclick = () => { S.mode = b.dataset.m; setOn('#mode', 'm', S.mode); renderModeExtra(); save(); });
+$$('#order button').forEach(b => b.onclick = () => { S.order = b.dataset.o; setOn('#order', 'o', S.order); save(); });
+$$('#styles button').forEach(b => b.onclick = () => { S.style = b.dataset.s; setOn('#styles', 's', S.style); save(); bridge.send({type:'test'}); });
+$$('#pos button').forEach(b => b.onclick = () => { S.pos = b.dataset.p; renderPos(); save(); bridge.send({type:'test'}); });
+$$('#corners .spot').forEach(b => b.onclick = () => { S.corner = b.dataset.c; renderPos(); save(); bridge.send({type:'test'}); });
+$('#dur').oninput = e => { S.dur = +e.target.value; renderLabels(); };
+$('#size').oninput = e => { S.size = +e.target.value; renderLabels(); };
+$('#dur').onchange = save;
+$('#size').onchange = () => { save(); bridge.send({type:'test'}); };
+$('#addZ').onclick = () => { const v = $('#newZ').value.trim(); if (!v) return; S.azkar.push({t:v, on:true}); $('#newZ').value = ''; renderChips(); save(); };
+$('#newZ').onkeydown = e => { if (e.key === 'Enter') $('#addZ').click(); };
+$('#reset').onclick = () => bridge.send({type:'reset'});
+$('#test').onclick = () => bridge.send({type:'test'});
+$('#login').onclick = () => { const on = !$('#login').classList.contains('on'); AZ.setLogin(on); bridge.send({type:'login', on}); };
+$$('[data-href]').forEach(a => a.onclick = e => { e.preventDefault(); bridge.send({type:'open', url:a.dataset.href}); });
+
+bridge.send({type:'ready'});
+</script>
+</body>
+</html>

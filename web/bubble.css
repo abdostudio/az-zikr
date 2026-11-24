@@ -1,0 +1,59 @@
+/* AZ Zikr — the bubble. Shared by the overlay (Mac + Windows) and the settings previews. */
+@font-face{font-family:"AZ Amiri";src:url("fonts/AmiriQuran.ttf") format("truetype");font-weight:400 700}
+
+.zk{position:fixed;left:0;top:0;pointer-events:none;transform:translate(-50%,-100%)}
+.zk .pill{
+  position:relative;display:flex;align-items:center;
+  padding:5px 11px 6px;border-radius:999px;white-space:nowrap;
+  font-family:"IBM Plex Sans Arabic",-apple-system,"SF Arabic","Segoe UI",Tahoma,sans-serif;
+  font-weight:500;font-size:var(--fs,13px);line-height:1.5;
+  color:rgba(255,255,255,.92);background:rgba(8,22,60,.82);
+  border:1px solid rgba(255,255,255,.08);box-shadow:0 4px 12px rgba(6,18,48,.18);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  animation:zk-pop var(--dur,1600ms) ease-out forwards;
+}
+.zk .pill::after{ /* tail */
+  content:"";position:absolute;left:50%;bottom:-4px;width:8px;height:8px;
+  background:rgba(8,22,60,.82);transform:translateX(-50%) rotate(45deg);border-radius:0 0 3px 0;
+}
+@keyframes zk-pop{
+  0%  {opacity:0;transform:translateY(4px)}
+  18% {opacity:1;transform:translateY(0)}
+  75% {opacity:1;transform:translateY(-6px)}
+  100%{opacity:0;transform:translateY(-10px)}
+}
+
+/* fixed spot: no tail, anchored by edges instead of the pointer */
+.zk.fixed{transform:none;top:auto;left:auto}
+.zk.fixed.center{transform:translateX(-50%)}
+.zk.fixed .pill::after{display:none}
+.zk.fixed.s-callig .pill::after{display:block}
+
+/* gradient: calm navy → royal blue */
+.zk.s-grad .pill{background:linear-gradient(135deg,rgba(6,18,48,.9) 0%,rgba(20,52,150,.88) 100%);border-color:rgba(255,255,255,.1)}
+.zk.s-grad .pill::after{background:rgba(12,32,95,.9)}
+/* glass: light frosted, navy text */
+.zk.s-glass .pill{background:rgba(255,255,255,.72);color:#061230;border-color:rgba(255,255,255,.9);
+  box-shadow:0 4px 14px rgba(6,18,48,.12);backdrop-filter:blur(12px) saturate(1.4);-webkit-backdrop-filter:blur(12px) saturate(1.4)}
+.zk.s-glass .pill::after{background:rgba(255,255,255,.72)}
+/* tag: compact white card, royal-blue edge */
+.zk.s-tag .pill{border-radius:8px;background:#fff;color:#061230;border:none;
+  border-inline-start:3px solid #004acc;box-shadow:0 3px 10px rgba(6,18,48,.14)}
+.zk.s-tag .pill::after{background:#fff;width:7px;height:7px;bottom:-3px}
+/* text only (default): no background, soft halo so it reads on anything */
+.zk.s-text .pill{background:none;border:none;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;
+  padding:2px 4px;color:#0b1d4a;font-weight:600;text-shadow:0 0 6px #fff,0 0 12px #fff,0 0 2px #fff}
+.zk.s-text .pill::after{display:none}
+/* calligraphy */
+.zk.s-callig .pill{background:none;border:none;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;
+  padding:0 4px 6px;font-family:"AZ Amiri","Amiri",serif;font-weight:700;font-size:calc(var(--fs,13px) * 1.35);
+  color:#061230;text-shadow:0 0 8px rgba(255,255,255,.95),0 0 2px #fff}
+.zk.s-callig .pill::after{left:50%;bottom:0;width:60%;height:2px;border-radius:2px;transform:translateX(-50%);
+  background:linear-gradient(90deg,transparent,#a8cc00,transparent)}
+
+/* Dark mode: the background-less styles flip to light text with a dark halo */
+@media (prefers-color-scheme: dark){
+  .zk.s-text .pill{color:#fff;text-shadow:0 0 6px rgba(0,0,0,.85),0 0 12px rgba(0,0,0,.6),0 1px 2px rgba(0,0,0,.9)}
+  .zk.s-callig .pill{color:#fff;text-shadow:0 0 8px rgba(0,0,0,.85),0 1px 2px rgba(0,0,0,.9)}
+  .zk.s-callig .pill::after{background:linear-gradient(90deg,transparent,#D4FF24,transparent)}
+}

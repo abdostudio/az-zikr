@@ -1,0 +1,7 @@
+.DS_Store
+mac/.build/
+mac/dist/
+windows/publish/
+windows/output/
+windows/AZZikr/bin/
+windows/AZZikr/obj/

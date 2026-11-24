@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="bubble.css">
+<style>
+  html,body{margin:0;height:100%;background:transparent;overflow:hidden;user-select:none;-webkit-user-select:none}
+  body.preview{background:linear-gradient(160deg,#e9edf7,#d3dbef)}
+</style>
+</head>
+<body>
+<script>
+// Native shells call AZ.show(x, y, text, style, durationMs, fontSize) with x/y in this page's CSS pixels.
+window.AZ = {
+  show(x, y, text, style, dur, size, frozen) {
+    const w = document.createElement('div');
+    w.className = 'zk s-' + (style || 'text');
+    w.style.left = x + 'px';
+    w.style.top = (y - 10) + 'px';
+    w.style.setProperty('--dur', (dur || 1600) + 'ms');
+    w.style.setProperty('--fs', (size || 13) + 'px');
+    const p = document.createElement('div');
+    p.className = 'pill';
+    p.textContent = text;
+    if (frozen) { p.style.animationDelay = '-' + Math.round((dur || 1600) * 0.4) + 'ms'; p.style.animationPlayState = 'paused'; }
+    w.appendChild(p);
+    document.body.appendChild(w);
+    if (!frozen) setTimeout(() => w.remove(), (dur || 1600) + 80);
+  }
+};
+// Fixed spot: corner = tl|tc|tr|bl|bc|br; inset = {t,r,b,l} = space taken by menu bar / dock / taskbar.
+AZ.showFixed = function (corner, inset, text, style, dur, size, frozen) {
+  document.querySelectorAll('.zk.fixed').forEach(e => e.remove());   // one at a time, never piles up
+  const M = 14, i = inset || {t:0, r:0, b:0, l:0};
+  AZ.show(0, 0, text, style, dur, size, frozen);
+  const w = document.body.lastElementChild;
+  w.classList.add('fixed');
+  w.style.left = 'auto'; w.style.top = 'auto';
+  const v = corner[0], h = corner[1];
+  if (v === 't') w.style.top = (i.t + M) + 'px'; else w.style.bottom = (i.b + M) + 'px';
+  if (h === 'l') w.style.left = (i.l + M + 6) + 'px';
+  else if (h === 'r') w.style.right = (i.r + M + 6) + 'px';
+  else { w.style.left = '50%'; w.classList.add('center'); }
+};
+if (location.search.includes('preview')) document.body.classList.add('preview');
+</script>
+</body>
+</html>

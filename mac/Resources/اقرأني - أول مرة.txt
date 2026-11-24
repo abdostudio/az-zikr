@@ -1,0 +1,14 @@
+AZ Zikr — ذكر صغير مع كل كليك
+
+التثبيت:
+١) اسحب "AZ Zikr" على فولدر Applications.
+٢) افتح AZ Zikr من Applications.
+
+لو ظهرت رسالة إن الماك مش قادر يتأكد من البرنامج:
+- افتح System Settings ← Privacy & Security
+- انزل لتحت هتلاقي سطر عن AZ Zikr، دوس "Open Anyway"
+- ده بيحصل مرة واحدة بس.
+
+بعد ما يفتح هتلاقي علامة AZ فوق في الـ menu bar، منها تفتح الإعدادات.
+
+الفكرة من Sherif Tolba · تصميم وتنفيذ Abdelrahman Ahmed
